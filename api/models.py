@@ -126,6 +126,9 @@ class Proveedor(models.Model):
     direccionProveedor = models.CharField(max_length=250)
     fechaRegistro = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return f"Proveedor: {self.nombreProveedor} - Riff: {self.riffProveedor}"
+
 
 
     
