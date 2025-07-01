@@ -12,3 +12,16 @@ Content-Type: application/json
         }
     ]
 }
+
+###
+
+POST http://127.0.0.1:8000/proveedores/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "riffProveedor": 12345,
+    "nombreProveedor": "Pollos Recao",
+    "email": "recao@email.com",
+    "telefonoProveedor": "04128187272",
+    "direccionProveedor": "Via Perija"
+}

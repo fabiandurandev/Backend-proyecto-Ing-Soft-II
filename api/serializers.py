@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Producto, Servicio, Venta, Empleado, Cliente, DetalleVentaServicio, DetalleVenta, DetalleVentaProducto, Proveedor
+from rest_framework.validators import UniqueValidator
 
 class ClienteSerializer(serializers.ModelSerializer):
     class Meta:
@@ -29,6 +30,14 @@ class ProductoSerializer(serializers.ModelSerializer):
         ]
 
 class ProveedorSerializer(serializers.ModelSerializer):
+    riffProveedor = serializers.IntegerField(
+        validators=[
+            UniqueValidator(
+                queryset=Proveedor.objects.all(),
+                message="El rif ya existe"
+            )
+        ]
+    )
     class Meta:
         model = Proveedor
         fields = '__all__'

@@ -27,9 +27,7 @@ class ServicioListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = ServicioSerializer
     filterset_class = ServicioFilter
 
-    def create(self, request, *args, **kwargs):
-        print("DATA RECIBIDA:", request.data)
-        return super().create(request, *args, **kwargs)
+   
     
 class ServicioRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Servicio.objects.all()
@@ -38,7 +36,7 @@ class ServicioRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView
 
     # ---VISTAS RELACIONADAS A CLIENTES---
 
-class ClienteListCreateAPIView(generics.ListAPIView):
+class ClienteListCreateAPIView(generics.ListCreateAPIView):
     queryset = Cliente.objects.all()
     serializer_class = ClienteSerializer
 
@@ -49,7 +47,7 @@ class ClienteRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView)
 
     # --VISTAS RELACIONADAS A PROVEEDORES---
 
-class ProveedorListCreateAPIView(generics.ListAPIView):
+class ProveedorListCreateAPIView(generics.ListCreateAPIView):
     queryset = Proveedor.objects.all()
     serializer_class = ProveedorSerializer
 

@@ -119,7 +119,8 @@ class DetalleVenta(models.Model):
     
 
 class Proveedor(models.Model):
-    riffProveedor = models.PositiveIntegerField()
+    riffProveedor = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(999999999)],
+        unique=True)
     nombreProveedor = models.CharField(max_length=100)
     email = models.EmailField(max_length=250)
     telefonoProveedor = models.CharField(max_length=100)
