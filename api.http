@@ -1,0 +1,14 @@
+POST http://127.0.0.1:8000/ventas/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "idCliente": 1,
+    "idEmpleado": 1,
+    "estadoVenta": "VAL",
+    "itemsProductos": [
+        {
+            "producto": 1,
+            "cantidad": 3
+        }
+    ]
+}

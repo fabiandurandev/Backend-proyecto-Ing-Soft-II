@@ -96,13 +96,15 @@ class DetalleVentaProducto(models.Model):
         return f"{self.cantidad} x {self.producto} en Venta {self.venta.id}"
     
 class DetalleVentaServicio(models.Model):
-    venta = models.ForeignKey(Venta, on_delete=models.CASCADE, related_name='itermsServicio')
+    venta = models.ForeignKey(Venta, on_delete=models.CASCADE, related_name='itemsServicio')
     servicio = models.ForeignKey(Servicio, on_delete=models.CASCADE)
     cantidad = models.PositiveIntegerField()
+    nombreServicio = models.CharField(max_length=100,null=True, blank=True)
+    precioServicio = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
     @property
     def servicio_subtotal(self):
-        return self.servicio.precioServicio * self.cantidad
+        return self.precioServicio * self.cantidad
     
     def __str__(self):
         return f"{self.cantidad} x {self.servicio} en Venta {self.venta.id}"

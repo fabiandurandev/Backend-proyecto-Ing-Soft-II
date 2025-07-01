@@ -3,5 +3,9 @@ from . import views
 
 urlpatterns = [
     path('productos/', views.ProductoListaCreateAPIView.as_view()),
-    path('ventas/', views.ventas_lista)
+    path('servicios/', views.ServicioListCreateAPIView.as_view()),
+    path('clientes/', views.ClienteListCreateAPIView.as_view()),
+    path('servicio/<int:codigoServicio>', views.ServicioRetrieveUpdateDestroyAPIView.as_view()),
+    path('clientes/<int:cedulaCliente>', views.ClienteRetrieveUpdateDestroyAPIView.as_view()),
+    path('ventas/', views.VentaListCreateAPIView.as_view())
 ]
