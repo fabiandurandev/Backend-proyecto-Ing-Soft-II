@@ -116,6 +116,15 @@ class DetalleVenta(models.Model):
 
     def __str__(self):
         return f"Detalle de vetan: {self.ventaDetalle} - Cliente: {self.nombreCliente}"
+    
+
+class Proveedor(models.Model):
+    riffProveedor = models.PositiveIntegerField()
+    nombreProveedor = models.CharField(max_length=100)
+    email = models.EmailField(max_length=250)
+    telefonoProveedor = models.CharField(max_length=100)
+    direccionProveedor = models.CharField(max_length=250)
+    fechaRegistro = models.DateTimeField(auto_now_add=True)
 
 
 

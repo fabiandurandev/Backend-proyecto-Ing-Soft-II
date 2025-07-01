@@ -143,6 +143,7 @@ class VentaSerializer(serializers.ModelSerializer):
         model = Venta
         fields = [
             'id',
+            'fecha',
             'idCliente',
             'idEmpleado',
             'estadoVenta',

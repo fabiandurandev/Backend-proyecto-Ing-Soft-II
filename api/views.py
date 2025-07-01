@@ -21,6 +21,11 @@ class ProductoListaCreateAPIView(generics.ListCreateAPIView):
     serializer_class = ProductoSerializer
     filterset_class = ProductoFilter
 
+class ProductoRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Producto.objects.all()
+    serializer_class = ProductoSerializer
+    lookup_field = 'codigoProducto'
+
 class ServicioListCreateAPIView(generics.ListCreateAPIView):
     queryset = Servicio.objects.all()
     serializer_class = ServicioSerializer
