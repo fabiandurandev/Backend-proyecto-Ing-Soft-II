@@ -30,7 +30,7 @@ class ProductoSerializer(serializers.ModelSerializer):
         ]
 
 class ProveedorSerializer(serializers.ModelSerializer):
-    riffProveedor = serializers.IntegerField(
+    rifProveedor = serializers.IntegerField(
         validators=[
             UniqueValidator(
                 queryset=Proveedor.objects.all(),

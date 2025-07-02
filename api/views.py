@@ -1,8 +1,8 @@
 from django.shortcuts import get_object_or_404
-from .models import Producto, Venta, Cliente, Servicio, Proveedor
+from .models import Producto, Venta, Cliente, Servicio, Proveedor, Empleado
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from .serializers import ProductoSerializer, VentaSerializer, ClienteSerializer, VentaCreateSerializer, ServicioSerializer, ProveedorSerializer
+from .serializers import ProductoSerializer, VentaSerializer, ClienteSerializer, VentaCreateSerializer, ServicioSerializer, ProveedorSerializer, EmpleadoSerializer
 from rest_framework import generics
 from .filters import ProductoFilter, ServicioFilter
 
@@ -45,6 +45,17 @@ class ClienteRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView)
     serializer_class = ClienteSerializer
     lookup_field = 'cedulaCliente'
 
+    # --VISTAS RELACIONADAS A EMPLEADOS--
+
+class EmpleadoListCreateAPIView(generics.ListCreateAPIView):
+    queryset = Empleado.objects.all()
+    serializer_class= EmpleadoSerializer
+
+class EmpleadoRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
+     queryset = Empleado.objects.all()
+     serializer_class= EmpleadoSerializer
+     lookup_field = 'cedulaEmpleado'
+
     # --VISTAS RELACIONADAS A PROVEEDORES---
 
 class ProveedorListCreateAPIView(generics.ListCreateAPIView):
@@ -54,7 +65,7 @@ class ProveedorListCreateAPIView(generics.ListCreateAPIView):
 class ProveedorRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Proveedor.objects.all()
     serializer_class = ProveedorSerializer
-    lookup_field = 'riffProveedor'
+    lookup_field = 'rifProveedor'
 
 # ---VISTA RELACIONADA A VENTAS---
 
