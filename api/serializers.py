@@ -14,11 +14,28 @@ class ClienteSerializer(serializers.ModelSerializer):
         )
 
 class EmpleadoSerializer(serializers.ModelSerializer):
+
+    cedulaEmpleado = serializers.IntegerField(
+        validators=[
+            UniqueValidator(
+                queryset=Empleado.objects.all(),
+                message="La cedula ya existe"
+            )
+        ]
+    )
     class Meta:
         model = Empleado
         fields = '__all__'
 
 class ProductoSerializer(serializers.ModelSerializer):
+    codigoProducto = serializers.IntegerField(
+        validators=[
+            UniqueValidator(
+                queryset=Producto.objects.all(),
+                message="El codigo ya existe"
+            )
+        ]
+    )
     class Meta:
         model = Producto
         fields = [

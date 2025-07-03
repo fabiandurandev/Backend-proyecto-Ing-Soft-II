@@ -25,3 +25,16 @@ Content-Type: application/json
     "telefonoProveedor": "04128187272",
     "direccionProveedor": "Via Perija"
 }
+
+###
+
+
+POST http://127.0.0.1:8000/productos/ HTTP/1.1
+Content-Type: application/json
+
+{
+   "nombreProducto": "Crema para peinar 2",
+    "codigoProducto": 400,
+    "stock": 10,
+    "precioProducto": "2.00"
+}
