@@ -29,12 +29,16 @@ Content-Type: application/json
 ###
 
 
-POST http://127.0.0.1:8000/productos/ HTTP/1.1
+POST http://127.0.0.1:8000/compras/ HTTP/1.1
 Content-Type: application/json
 
 {
-   "nombreProducto": "Crema para peinar 2",
-    "codigoProducto": 400,
-    "stock": 10,
-    "precioProducto": "2.00"
+    "idProveedor": 4,
+    "estadoCompra": "VAL",
+    "itemsProductosCompra": [
+        {
+            "producto": 1,
+            "cantidad": 3
+        }
+    ]
 }

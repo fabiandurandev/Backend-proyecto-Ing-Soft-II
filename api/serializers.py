@@ -1,90 +1,110 @@
 from rest_framework import serializers
-from .models import Producto, Servicio, Venta, Empleado, Cliente, DetalleVentaServicio, DetalleVenta, DetalleVentaProducto, Proveedor
+from .models import (
+    Compra,
+    Producto,
+    Servicio,
+    Venta,
+    Empleado,
+    Cliente,
+    DetalleVentaServicio,
+    DetalleVenta,
+    DetalleVentaProducto,
+    Proveedor,
+    DetalleCompraProducto,
+)
 from rest_framework.validators import UniqueValidator
+
 
 class ClienteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cliente
         fields = (
-            'id',
-            'nombreCliente',
-            'cedulaCliente',
-            'direccionCliente',
-            'telefonoCliente'
+            "id",
+            "nombreCliente",
+            "cedulaCliente",
+            "direccionCliente",
+            "telefonoCliente",
         )
+
 
 class EmpleadoSerializer(serializers.ModelSerializer):
 
     cedulaEmpleado = serializers.IntegerField(
         validators=[
             UniqueValidator(
-                queryset=Empleado.objects.all(),
-                message="La cedula ya existe"
+                queryset=Empleado.objects.all(), message="La cedula ya existe"
             )
         ]
     )
+
     class Meta:
         model = Empleado
-        fields = '__all__'
+        fields = "__all__"
+
 
 class ProductoSerializer(serializers.ModelSerializer):
     codigoProducto = serializers.IntegerField(
         validators=[
             UniqueValidator(
-                queryset=Producto.objects.all(),
-                message="El codigo ya existe"
+                queryset=Producto.objects.all(), message="El codigo ya existe"
             )
         ]
     )
+
     class Meta:
         model = Producto
         fields = [
-            'id',
-            'nombreProducto',
-            'codigoProducto',
-            'stock',
-            'precioProducto',
+            "id",
+            "nombreProducto",
+            "codigoProducto",
+            "stock",
+            "precioProducto",
         ]
+
 
 class ProveedorSerializer(serializers.ModelSerializer):
     rifProveedor = serializers.IntegerField(
         validators=[
             UniqueValidator(
-                queryset=Proveedor.objects.all(),
-                message="El rif ya existe"
+                queryset=Proveedor.objects.all(), message="El rif ya existe"
             )
         ]
     )
+
     class Meta:
         model = Proveedor
-        fields = '__all__'
+        fields = "__all__"
+
 
 class ServicioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Servicio
         fields = [
-            'id',
-            'nombreServicio',
-            'codigoServicio',
-            'precioServicio',
+            "id",
+            "nombreServicio",
+            "codigoServicio",
+            "precioServicio",
         ]
 
+
 class DetalleVentaProductoSerializer(serializers.ModelSerializer):
-    nombreProducto = serializers.CharField(source='producto.nombreProducto')
-    precioProducto = serializers.DecimalField(
-        source='producto.precioProducto',
-        max_digits=10,
-        decimal_places=2
-    )
+    # nombreProducto = serializers.CharField(source='producto.nombreProducto')
+    # precioProducto = serializers.DecimalField(
+    #     source='producto.precioProducto',
+    #     max_digits=10,
+    #     decimal_places=2
+    # )
 
     class Meta:
         model = DetalleVentaProducto
         fields = (
-            'nombreProducto',
-            'precioProducto',
-            'cantidad',
-            'producto_subtotal'
+            "producto",
+            "nombreProducto",
+            "precioProducto",
+            "cantidad",
+            "producto_subtotal",
         )
+
 
 class DetalleVentaServicioSerializer(serializers.ModelSerializer):
     # nombreServicio = serializers.CharField(source='servicio.nombreServicio')
@@ -97,60 +117,70 @@ class DetalleVentaServicioSerializer(serializers.ModelSerializer):
     class Meta:
         model = DetalleVentaServicio
         fields = (
-            'nombreServicio',
-            'precioServicio',
-            'cantidad',
-            'servicio_subtotal'
+            "servicio",
+            "nombreServicio",
+            "precioServicio",
+            "cantidad",
+            "servicio_subtotal",
         )
+
 
 class VentaCreateSerializer(serializers.ModelSerializer):
 
     class DetalleVentaProductoCreateSerializer(serializers.ModelSerializer):
         class Meta:
             model = DetalleVentaProducto
-            fields = ('producto', 'cantidad')
+            fields = ("producto", "cantidad")
 
     class DetalleVentaServicioCreateSerializer(serializers.ModelSerializer):
         class Meta:
             model = DetalleVentaServicio
-            fields = ('servicio', 'cantidad')
+            fields = ("servicio", "cantidad")
 
     itemsProductos = DetalleVentaProductoCreateSerializer(many=True, required=False)
     itemsServicios = DetalleVentaServicioCreateSerializer(many=True, required=False)
 
     def create(self, validated_data):
-            productos_data = validated_data.pop('itemsProductos', [])
-            servicios_data = validated_data.pop('itemsServicios', [])
+        productos_data = validated_data.pop("itemsProductos", [])
+        servicios_data = validated_data.pop("itemsServicios", [])
 
-            venta = Venta.objects.create(**validated_data)
+        venta = Venta.objects.create(**validated_data)
 
-            for item in productos_data:
-                DetalleVentaProducto.objects.create(venta=venta, producto=item['producto'], cantidad=item['cantidad'])
-            
-            # for item in servicios_data:
-            #     DetalleVentaServicio.objects.create(venta=venta, servicio=item['servicio'], cantidad=item['cantidad'])
-
-            for item in servicios_data:
-                servicio = item['servicio']
-                DetalleVentaServicio.objects.create(
-                    venta=venta,
-                    servicio=servicio,
-                    cantidad=item['cantidad'],
-                    nombreServicio=servicio.nombreServicio,
-                    precioServicio=servicio.precioServicio
+        for item in productos_data:
+            producto = item["producto"]
+            DetalleVentaProducto.objects.create(
+                venta=venta,
+                producto=producto,
+                cantidad=item["cantidad"],
+                nombreProducto=producto.nombreProducto,
+                precioProducto=producto.precioProducto,
             )
 
-            return venta
+        # for item in servicios_data:
+        #     DetalleVentaServicio.objects.create(venta=venta, servicio=item['servicio'], cantidad=item['cantidad'])
+
+        for item in servicios_data:
+            servicio = item["servicio"]
+            DetalleVentaServicio.objects.create(
+                venta=venta,
+                servicio=servicio,
+                cantidad=item["cantidad"],
+                nombreServicio=servicio.nombreServicio,
+                precioServicio=servicio.precioServicio,
+            )
+
+        return venta
 
     class Meta:
         model = Venta
         fields = [
-            'idCliente',
-            'idEmpleado',
-            'estadoVenta',
-            'itemsProductos',
-            'itemsServicios',   
+            "idCliente",
+            "idEmpleado",
+            "estadoVenta",
+            "itemsProductos",
+            "itemsServicios",
         ]
+
 
 class VentaSerializer(serializers.ModelSerializer):
     itemsProductos = DetalleVentaProductoSerializer(many=True, required=False)
@@ -159,26 +189,113 @@ class VentaSerializer(serializers.ModelSerializer):
     idCliente = ClienteSerializer()
     idEmpleado = EmpleadoSerializer()
 
-    def get_precio_total(self,obj):
+    def get_precio_total(self, obj):
         ventaItems = obj.itemsProductos.all()
 
-        total_productos =  sum(ventaItem.producto_subtotal for ventaItem in ventaItems)
+        total_productos = sum(ventaItem.producto_subtotal for ventaItem in ventaItems)
 
         ventaItemsServicio = obj.itemsServicio.all()
 
-        total_servicios =  sum(ventaItem.servicio_subtotal for ventaItem in ventaItemsServicio)
+        total_servicios = sum(
+            ventaItem.servicio_subtotal for ventaItem in ventaItemsServicio
+        )
 
         return total_productos + total_servicios
 
     class Meta:
         model = Venta
         fields = [
-            'id',
-            'fecha',
-            'idCliente',
-            'idEmpleado',
-            'estadoVenta',
-            'itemsProductos',
-            'itemsServicio',
-            'precio_total'
+            "id",
+            "fecha",
+            "idCliente",
+            "idEmpleado",
+            "estadoVenta",
+            "itemsProductos",
+            "itemsServicio",
+            "precio_total",
+        ]
+
+
+class DetalleCompraProductoSerializer(serializers.ModelSerializer):
+    # nombreProducto = serializers.CharField(source='producto.nombreProducto')
+    # precioProducto = serializers.DecimalField(
+    #     source='producto.precioProducto',
+    #     max_digits=10,
+    #     decimal_places=2
+    # )
+
+    class Meta:
+        model = DetalleCompraProducto
+        fields = (
+            "producto",
+            "nombreProducto",
+            "precioProducto",
+            "cantidad",
+            "producto_subtotal",
+        )
+
+
+class CompraSerializer(serializers.ModelSerializer):
+    itemsProductosCompra = DetalleCompraProductoSerializer(many=True, required=False)
+    precio_total = serializers.SerializerMethodField()
+    idProveedor = ProveedorSerializer()
+
+    def get_precio_total(self, obj):
+        compraItems = obj.itemsProductosCompra.all()
+
+        total_productos = sum(
+            compraItem.producto_subtotal for compraItem in compraItems
+        )
+
+        return total_productos
+
+    class Meta:
+        model = Compra
+        fields = [
+            "id",
+            "fecha",
+            "idProveedor",
+            "estadoCompra",
+            "itemsProductosCompra",
+            "precio_total",
+        ]
+
+
+class CompraCreateSerializer(serializers.ModelSerializer):
+
+    class DetalleCompraProductoCreateSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = DetalleCompraProducto
+            fields = ("producto", "cantidad")
+
+    itemsProductosCompra = DetalleCompraProductoCreateSerializer(
+        many=True, required=False
+    )
+
+    def create(self, validated_data):
+        productos_data = validated_data.pop("itemsProductosCompra", [])
+
+        compra = Compra.objects.create(**validated_data)
+
+        for item in productos_data:
+            producto = item["producto"]
+            DetalleCompraProducto.objects.create(
+                compra=compra,
+                producto=producto,
+                cantidad=item["cantidad"],
+                nombreProducto=producto.nombreProducto,
+                precioProducto=producto.precioProducto,
+            )
+
+        # for item in servicios_data:
+        #     DetalleVentaServicio.objects.create(venta=venta, servicio=item['servicio'], cantidad=item['cantidad'])
+
+        return compra
+
+    class Meta:
+        model = Compra
+        fields = [
+            "idProveedor",
+            "estadoCompra",
+            "itemsProductosCompra",
         ]
