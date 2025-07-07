@@ -93,7 +93,9 @@ class DetalleVentaProducto(models.Model):
     venta = models.ForeignKey(
         Venta, on_delete=models.CASCADE, related_name="itemsProductos"
     )
-    producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
+    producto = models.ForeignKey(
+        Producto, on_delete=models.SET_NULL, null=True, blank=True
+    )
     cantidad = models.PositiveIntegerField()
     nombreProducto = models.CharField(max_length=100, null=True, blank=True)
     precioProducto = models.DecimalField(
@@ -105,14 +107,16 @@ class DetalleVentaProducto(models.Model):
         return self.precioProducto * self.cantidad
 
     def __str__(self):
-        return f"{self.cantidad} x {self.producto} en Venta {self.venta.id}"
+        return f"{self.cantidad} x {self.nombreProducto} en Venta {self.venta.id}"
 
 
 class DetalleVentaServicio(models.Model):
     venta = models.ForeignKey(
         Venta, on_delete=models.CASCADE, related_name="itemsServicio"
     )
-    servicio = models.ForeignKey(Servicio, on_delete=models.CASCADE)
+    servicio = models.ForeignKey(
+        Servicio, on_delete=models.SET_NULL, null=True, blank=True
+    )
     cantidad = models.PositiveIntegerField()
     nombreServicio = models.CharField(max_length=100, null=True, blank=True)
     precioServicio = models.DecimalField(
@@ -124,7 +128,7 @@ class DetalleVentaServicio(models.Model):
         return self.precioServicio * self.cantidad
 
     def __str__(self):
-        return f"{self.cantidad} x {self.servicio} en Venta {self.venta.id}"
+        return f"{self.cantidad} x {self.nombreServicio} en Venta {self.venta.id}"
 
 
 class DetalleVenta(models.Model):
@@ -172,7 +176,9 @@ class DetalleCompraProducto(models.Model):
     compra = models.ForeignKey(
         Compra, on_delete=models.CASCADE, related_name="itemsProductosCompra"
     )
-    producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
+    producto = models.ForeignKey(
+        Producto, on_delete=models.SET_NULL, null=True, blank=True
+    )
     cantidad = models.PositiveIntegerField()
     nombreProducto = models.CharField(max_length=100, null=True, blank=True)
     precioProducto = models.DecimalField(
@@ -184,4 +190,5 @@ class DetalleCompraProducto(models.Model):
         return self.precioProducto * self.cantidad
 
     def __str__(self):
-        return f"{self.cantidad} x {self.producto} en Compra {self.compra.id}"
+
+        return f"{self.cantidad} x {self.nombreProducto} en Compra {self.compra.id}"

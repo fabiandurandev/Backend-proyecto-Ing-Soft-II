@@ -15,6 +15,10 @@ from .serializers import (
 )
 from rest_framework import generics
 from .filters import ProductoFilter, ServicioFilter
+from rest_framework.views import APIView
+from rest_framework import status
+from django.utils.dateparse import parse_date
+from datetime import datetime, time
 
 
 #   ---VISTA RELACIONADAS A PRODUCTOS---
@@ -97,6 +101,40 @@ class VentaListCreateAPIView(generics.ListCreateAPIView):
         if self.request.method == "POST":
             return VentaCreateSerializer
         return VentaSerializer
+
+
+class VentaRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Venta.objects.all()
+    serializer_class = VentaSerializer
+
+
+class VentaPorFechaAPIView(APIView):
+    def get(self, request):
+        fecha_inicio = request.query_params.get("fechaInicio")
+        fecha_fin = request.query_params.get("fechaFinal")
+
+        if not fecha_inicio or not fecha_fin:
+            return Response(
+                {"error": "Debe proporcionar 'fechaInicio' y 'fechaFinal'."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        fecha_inicio_date = parse_date(fecha_inicio)
+        fecha_fin_date = parse_date(fecha_fin)
+
+        if not fecha_inicio_date or not fecha_fin_date:
+            return Response(
+                {"error": "Formato de fecha inválido. Debe ser YYYY-MM-DD."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Convertir a datetime con hora completa
+        fecha_inicio_dt = datetime.combine(fecha_inicio_date, time.min)  # 00:00:00
+        fecha_fin_dt = datetime.combine(fecha_fin_date, time.max)  # 23:59:59.999999
+
+        ventas = Venta.objects.filter(fecha__range=(fecha_inicio_dt, fecha_fin_dt))
+        serializer = VentaSerializer(ventas, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class CompraListCreateAPIView(generics.ListCreateAPIView):

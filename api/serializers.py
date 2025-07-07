@@ -148,6 +148,7 @@ class VentaCreateSerializer(serializers.ModelSerializer):
 
         for item in productos_data:
             producto = item["producto"]
+            cantidad = item["cantidad"]
             DetalleVentaProducto.objects.create(
                 venta=venta,
                 producto=producto,
@@ -155,6 +156,9 @@ class VentaCreateSerializer(serializers.ModelSerializer):
                 nombreProducto=producto.nombreProducto,
                 precioProducto=producto.precioProducto,
             )
+
+            producto.stock -= cantidad
+            producto.save()
 
         # for item in servicios_data:
         #     DetalleVentaServicio.objects.create(venta=venta, servicio=item['servicio'], cantidad=item['cantidad'])
@@ -279,6 +283,7 @@ class CompraCreateSerializer(serializers.ModelSerializer):
 
         for item in productos_data:
             producto = item["producto"]
+            cantidad = item["cantidad"]
             DetalleCompraProducto.objects.create(
                 compra=compra,
                 producto=producto,
@@ -286,6 +291,9 @@ class CompraCreateSerializer(serializers.ModelSerializer):
                 nombreProducto=producto.nombreProducto,
                 precioProducto=producto.precioProducto,
             )
+
+            producto.stock += cantidad
+            producto.save()
 
         # for item in servicios_data:
         #     DetalleVentaServicio.objects.create(venta=venta, servicio=item['servicio'], cantidad=item['cantidad'])

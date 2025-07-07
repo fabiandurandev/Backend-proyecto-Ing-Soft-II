@@ -28,5 +28,11 @@ urlpatterns = [
         views.ProveedorRetrieveUpdateDestroyAPIView.as_view(),
     ),
     path("ventas/", views.VentaListCreateAPIView.as_view()),
+    path("venta/<int:pk>", views.VentaRetrieveUpdateDestroyAPIView.as_view()),
+    path(
+        "ventas/por-fechas/",
+        views.VentaPorFechaAPIView.as_view(),
+        name="ventas_por_fechas",
+    ),
     path("compras/", views.CompraListCreateAPIView.as_view()),
 ]
