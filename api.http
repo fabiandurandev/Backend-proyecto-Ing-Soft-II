@@ -48,9 +48,9 @@ Content-Type: application/json
 GET http://127.0.0.1:8000/ventas/por-fechas/?fecha_inicio=2025-07-01&fecha_fin=2025-07-05
 
 ###
-PATCH  http://127.0.0.1:8000/venta/15 HTTP/1.1
+PATCH  http://127.0.0.1:8000/compra/1 HTTP/1.1
 Content-Type: application/json
 
 {
-    "estadoVenta": "ANUL"
+    "estadoCompra": "ANUL"
 }

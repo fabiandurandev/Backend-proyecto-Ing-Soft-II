@@ -35,4 +35,10 @@ urlpatterns = [
         name="ventas_por_fechas",
     ),
     path("compras/", views.CompraListCreateAPIView.as_view()),
+    path("compra/<int:pk>", views.CompraRetrieveUpdateDestroyAPIView.as_view()),
+    path(
+        "compras/por-fechas/",
+        views.CompraPorFechaAPIView.as_view(),
+        name="compras_por_fechas",
+    ),
 ]
