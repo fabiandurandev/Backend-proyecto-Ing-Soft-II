@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns = [
     path("productos/", views.ProductoListaCreateAPIView.as_view()),
@@ -19,7 +20,7 @@ urlpatterns = [
         views.EmpleadoRetrieveUpdateDestroyAPIView.as_view(),
     ),
     path(
-        "clientes/<int:cedulaCliente>",
+        "cliente/<int:cedulaCliente>",
         views.ClienteRetrieveUpdateDestroyAPIView.as_view(),
     ),
     path("proveedores/", views.ProveedorListCreateAPIView.as_view()),
@@ -41,4 +42,11 @@ urlpatterns = [
         views.CompraPorFechaAPIView.as_view(),
         name="compras_por_fechas",
     ),
+    path("registro_usuario/", views.RegistroUsuarioAPIView.as_view()),
+    path(
+        "api/token/",
+        views.CustomTokenObtainPairView.as_view(),
+        name="token_obtain_pair",
+    ),
+    path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
 ]

@@ -13,6 +13,10 @@ from .models import (
     DetalleCompraProducto,
 )
 from rest_framework.validators import UniqueValidator
+from rest_framework import serializers
+from .models import Usuario, Empleado
+from django.contrib.auth.hashers import make_password
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 
 class ClienteSerializer(serializers.ModelSerializer):
@@ -307,3 +311,60 @@ class CompraCreateSerializer(serializers.ModelSerializer):
             "estadoCompra",
             "itemsProductosCompra",
         ]
+
+
+# api/serializers.py
+
+
+class RegistroUsuarioSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True, min_length=6)
+
+    def validate_email(self, value):
+        try:
+            empleado = Empleado.objects.get(emailEmpleado=value)
+        except Empleado.DoesNotExist:
+            raise serializers.ValidationError("No existe un empleado con este correo.")
+
+        if Usuario.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Ya existe un usuario con este correo.")
+
+        if Usuario.objects.filter(empleado=empleado).exists():
+            raise serializers.ValidationError(
+                "Este empleado ya tiene un usuario registrado."
+            )
+
+        return value
+
+    def create(self, validated_data):
+        email = validated_data["email"]
+        password = validated_data["password"]
+        empleado = Empleado.objects.get(emailEmpleado=email)
+
+        usuario = Usuario.objects.create(
+            email=email,
+            empleado=empleado,
+            password=make_password(password),
+            is_active=True,
+            is_staff=(empleado.nivelAutorizacion == Empleado.NivelAutorizacion.admin),
+        )
+        return usuario
+
+
+# api/serializers.py
+
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    username_field = "email"
+
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        # Puedes agregar info extra al token si quieres:
+        token["email"] = user.email
+        return token
+
+    def validate(self, attrs):
+        # Cambiar 'email' por 'username' internamente para que funcione
+        attrs["username"] = attrs.get("email")
+        return super().validate(attrs)

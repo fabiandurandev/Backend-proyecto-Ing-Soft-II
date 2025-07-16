@@ -1,5 +1,11 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.contrib.auth.models import (
+    AbstractBaseUser,
+    BaseUserManager,
+    PermissionsMixin,
+)
+from django.db import models
 
 
 class Cliente(models.Model):
@@ -33,7 +39,7 @@ class Empleado(models.Model):
     )
     direccionEmpleado = models.CharField(max_length=150)
     telefonoEmpleado = models.CharField(max_length=100)
-    emailEmpleado = models.EmailField(max_length=250)
+    emailEmpleado = models.EmailField(max_length=250, unique=True)
     nivelAutorizacion = models.CharField(
         max_length=5,
         choices=NivelAutorizacion.choices,
@@ -42,6 +48,39 @@ class Empleado(models.Model):
 
     def __str__(self):
         return self.nombreEmpleado
+
+
+class UsuarioManager(BaseUserManager):
+    def create_user(self, email, password=None, **extra_fields):
+        if not email:
+            raise ValueError("El email es obligatorio")
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, password=None, **extra_fields):
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
+        return self.create_user(email, password, **extra_fields)
+
+
+class Usuario(AbstractBaseUser, PermissionsMixin):
+    email = models.EmailField(unique=True, max_length=255)
+    empleado = models.OneToOneField(
+        "Empleado", on_delete=models.CASCADE, null=True, blank=True
+    )
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = []
+
+    objects = UsuarioManager()
+
+    def __str__(self):
+        return self.email
 
 
 class Producto(models.Model):
@@ -145,7 +184,7 @@ class Proveedor(models.Model):
         validators=[MinValueValidator(1), MaxValueValidator(999999999)], unique=True
     )
     nombreProveedor = models.CharField(max_length=100)
-    emailProveedor = models.EmailField(max_length=250)
+    emailProveedor = models.EmailField(max_length=250, unique=True)
     telefonoProveedor = models.CharField(max_length=100)
     direccionProveedor = models.CharField(max_length=250)
     fechaRegistro = models.DateTimeField(auto_now_add=True)

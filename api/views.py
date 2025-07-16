@@ -21,6 +21,7 @@ from .serializers import (
     EmpleadoSerializer,
     CompraCreateSerializer,
     CompraSerializer,
+    RegistroUsuarioSerializer,
 )
 from rest_framework import generics
 from .filters import ProductoFilter, ServicioFilter
@@ -29,6 +30,8 @@ from rest_framework import status
 from django.utils.dateparse import parse_date
 from datetime import datetime, time
 from django.db import transaction
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .serializers import CustomTokenObtainPairSerializer
 
 
 #   ---VISTA RELACIONADAS A PRODUCTOS---
@@ -205,3 +208,25 @@ class CompraPorFechaAPIView(APIView):
         compras = Compra.objects.filter(fecha__range=(fecha_inicio_dt, fecha_fin_dt))
         serializer = CompraSerializer(compras, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+# api/views.py
+
+
+class RegistroUsuarioAPIView(APIView):
+    def post(self, request):
+        serializer = RegistroUsuarioSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {"message": "Usuario creado correctamente"},
+                status=status.HTTP_201_CREATED,
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# api/views.py
+
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
