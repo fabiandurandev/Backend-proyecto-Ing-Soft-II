@@ -54,3 +54,24 @@ Content-Type: application/json
 {
     "estadoCompra": "ANUL"
 }
+
+###
+
+### Crear nuevo usuario desde email de empleado
+POST http://127.0.0.1:8000/registro_usuario/
+Content-Type: application/json
+
+{
+  "email": "fabiandduranj@gmail.com",
+  "password": "26638389"
+}
+
+### Iniciar sesión con email usando JWT
+POST http://127.0.0.1:8000/api/token/
+Content-Type: application/json
+
+{
+   "email": "fabiandduranj@gmail.com",
+  "password": "26638389"
+}
+

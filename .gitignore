@@ -1,4 +1,39 @@
-# Ignorar entornos virtuales
-venv/
+# Entornos virtuales
 env/
+venv/
 .venv/
+
+# Archivos compilados de Python
+__pycache__/
+*.py[cod]
+*.so
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Archivos de log
+*.log
+
+# Archivos de configuración de entorno
+.env
+*.env
+
+# Archivos de configuración del editor
+.vscode/
+.idea/
+
+# Archivos de traducción y coverage
+*.pot
+htmlcov/
+.coverage
+.coverage.*
+.tox/
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+
+# Ignorar caché de migraciones (pero NO los archivos de migración reales)
+**/migrations/__pycache__/
+

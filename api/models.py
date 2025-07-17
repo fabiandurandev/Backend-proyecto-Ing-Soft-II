@@ -123,6 +123,7 @@ class Venta(models.Model):
     servicios = models.ManyToManyField(
         Servicio, through="DetalleVentaServicio", related_name="ventasServicios"
     )
+    tasaCambio = models.DecimalField(max_digits=10, decimal_places=2, default=1)
 
     def __str__(self):
         return f"Venta {self.id}"
@@ -206,6 +207,7 @@ class Compra(models.Model):
     productos = models.ManyToManyField(
         Producto, through="DetalleCompraProducto", related_name="comprasProductos"
     )
+    tasaCambio = models.DecimalField(max_digits=10, decimal_places=2, default=1)
 
     def __str__(self):
         return f"Venta {self.id}"
@@ -231,3 +233,11 @@ class DetalleCompraProducto(models.Model):
     def __str__(self):
 
         return f"{self.cantidad} x {self.nombreProducto} en Compra {self.compra.id}"
+
+
+class TasaCambio(models.Model):
+    valor = models.DecimalField(max_digits=10, decimal_places=2)
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.valor} - {self.fecha.strftime('%d/%m/%Y %H:%M')}"

@@ -12,7 +12,7 @@ from .models import (
     Compra,
     DetalleCompraProducto,
     Usuario,
-    UsuarioManager,
+    TasaCambio,
 )
 
 # Register your models here.
@@ -29,3 +29,4 @@ admin.site.register(Proveedor)
 admin.site.register(Compra)
 admin.site.register(DetalleCompraProducto)
 admin.site.register(Usuario)
+admin.site.register(TasaCambio)

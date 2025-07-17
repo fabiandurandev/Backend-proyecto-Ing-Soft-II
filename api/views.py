@@ -7,6 +7,7 @@ from .models import (
     Proveedor,
     Empleado,
     Compra,
+    TasaCambio,
     DetalleVentaProducto,
 )
 from rest_framework.response import Response
@@ -22,6 +23,7 @@ from .serializers import (
     CompraCreateSerializer,
     CompraSerializer,
     RegistroUsuarioSerializer,
+    TasaCambioSerializer,
 )
 from rest_framework import generics
 from .filters import ProductoFilter, ServicioFilter
@@ -230,3 +232,21 @@ class RegistroUsuarioAPIView(APIView):
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
+
+
+class TasaCambioAPIView(APIView):
+    def get(self, request):
+        ultima = TasaCambio.objects.order_by("-fecha").first()
+        if ultima:
+            serializer = TasaCambioSerializer(ultima)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(
+            {"detail": "No hay tasa registrada"}, status=status.HTTP_404_NOT_FOUND
+        )
+
+    def post(self, request):
+        serializer = TasaCambioSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

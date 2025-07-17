@@ -11,12 +11,14 @@ from .models import (
     DetalleVentaProducto,
     Proveedor,
     DetalleCompraProducto,
+    TasaCambio,
 )
 from rest_framework.validators import UniqueValidator
 from rest_framework import serializers
 from .models import Usuario, Empleado
 from django.contrib.auth.hashers import make_password
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class ClienteSerializer(serializers.ModelSerializer):
@@ -147,6 +149,13 @@ class VentaCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         productos_data = validated_data.pop("itemsProductos", [])
         servicios_data = validated_data.pop("itemsServicios", [])
+        try:
+            ultima_tasa = TasaCambio.objects.latest("id")
+            validated_data["tasaCambio"] = ultima_tasa.valor
+        except ObjectDoesNotExist:
+            raise serializers.ValidationError(
+                "No hay ninguna tasa de cambio registrada."
+            )
 
         venta = Venta.objects.create(**validated_data)
 
@@ -194,6 +203,7 @@ class VentaSerializer(serializers.ModelSerializer):
     itemsProductos = DetalleVentaProductoSerializer(many=True, required=False)
     itemsServicio = DetalleVentaServicioSerializer(many=True, required=False)
     precio_total = serializers.SerializerMethodField()
+    precio_total_bs = serializers.SerializerMethodField()
     idCliente = ClienteSerializer()
     idEmpleado = EmpleadoSerializer()
 
@@ -210,6 +220,12 @@ class VentaSerializer(serializers.ModelSerializer):
 
         return total_productos + total_servicios
 
+    def get_precio_total_bs(self, obj):
+        total_usd = self.get_precio_total(obj)
+        if obj.tasaCambio:
+            return round(total_usd * obj.tasaCambio, 2)
+        return None
+
     class Meta:
         model = Venta
         fields = [
@@ -220,7 +236,9 @@ class VentaSerializer(serializers.ModelSerializer):
             "estadoVenta",
             "itemsProductos",
             "itemsServicio",
+            "tasaCambio",
             "precio_total",
+            "precio_total_bs",
         ]
 
 
@@ -245,6 +263,8 @@ class DetalleCompraProductoSerializer(serializers.ModelSerializer):
 
 class CompraSerializer(serializers.ModelSerializer):
     itemsProductosCompra = DetalleCompraProductoSerializer(many=True, required=False)
+    precio_total_bs = serializers.SerializerMethodField()
+
     precio_total = serializers.SerializerMethodField()
     idProveedor = ProveedorSerializer()
 
@@ -257,6 +277,12 @@ class CompraSerializer(serializers.ModelSerializer):
 
         return total_productos
 
+    def get_precio_total_bs(self, obj):
+        total_usd = self.get_precio_total(obj)
+        if obj.tasaCambio:
+            return round(total_usd * obj.tasaCambio, 2)
+        return None
+
     class Meta:
         model = Compra
         fields = [
@@ -266,6 +292,7 @@ class CompraSerializer(serializers.ModelSerializer):
             "estadoCompra",
             "itemsProductosCompra",
             "precio_total",
+            "precio_total_bs",
         ]
 
 
@@ -282,6 +309,14 @@ class CompraCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         productos_data = validated_data.pop("itemsProductosCompra", [])
+
+        try:
+            ultima_tasa = TasaCambio.objects.latest("id")
+            validated_data["tasaCambio"] = ultima_tasa.valor
+        except ObjectDoesNotExist:
+            raise serializers.ValidationError(
+                "No hay ninguna tasa de cambio registrada."
+            )
 
         compra = Compra.objects.create(**validated_data)
 
@@ -368,3 +403,9 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         # Cambiar 'email' por 'username' internamente para que funcione
         attrs["username"] = attrs.get("email")
         return super().validate(attrs)
+
+
+class TasaCambioSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TasaCambio
+        fields = "__all__"
