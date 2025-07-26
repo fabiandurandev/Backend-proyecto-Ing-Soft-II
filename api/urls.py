@@ -50,4 +50,19 @@ urlpatterns = [
     ),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("tasa-cambio/", views.TasaCambioAPIView.as_view(), name="tasa-cambio"),
+    path(
+        "solicitar-codigo/",
+        views.SolicitarCodigoView.as_view(),
+        name="solicitar-codigo",
+    ),
+    path(
+        "verificar-codigo/",
+        views.VerificarCodigoView.as_view(),
+        name="verificar-codigo",
+    ),
+    path(
+        "cambiar-contrasena/",
+        views.CambiarContrasenaView.as_view(),
+        name="cambiar-contrasena",
+    ),
 ]

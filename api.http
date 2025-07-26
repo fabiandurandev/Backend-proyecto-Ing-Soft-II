@@ -75,3 +75,23 @@ Content-Type: application/json
   "password": "26638389"
 }
 
+### Solicitar código de recuperación
+POST http://localhost:8000/solicitar-codigo/
+Content-Type: application/json
+
+{
+  "email": "fabiandduranj@gmail.com"
+}
+
+
+###Verificar codigo
+
+curl -X POST http://localhost:8000/verificar-codigo/ \
+-H "Content-Type: application/json" \
+-d '{"email":"fabiandduranj@gmail.com", "codigo":"894078"}'
+
+### Cambiar contraseña (requiere token temporal)
+curl -X POST http://localhost:8000/cambiar-contrasena/ \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUzNTQ1NzE5LCJpYXQiOjE3NTM1NDUxMTksImp0aSI6IjJkZDIwMzNiYWM2MTQ2NWRhMTA3YmIzZTc2MGJiODI1IiwidXNlcl9pZCI6Mn0.ixbo6s7jLWSIoVeaSmmWbzpHN_h_s8LaUFq-SIY5md4" \
+-d '{"nueva_contrasena": "26638389a"}'

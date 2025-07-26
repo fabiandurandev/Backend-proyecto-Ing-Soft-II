@@ -24,16 +24,19 @@ from .serializers import (
     CompraSerializer,
     RegistroUsuarioSerializer,
     TasaCambioSerializer,
+    SolicitarCodigoSerializer,
+    VerificarCodigoSerializer,
+    CambiarContrasenaSerializer,
 )
-from rest_framework import generics
+from rest_framework import generics, status
 from .filters import ProductoFilter, ServicioFilter
 from rest_framework.views import APIView
-from rest_framework import status
 from django.utils.dateparse import parse_date
 from datetime import datetime, time
 from django.db import transaction
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .serializers import CustomTokenObtainPairSerializer
+from rest_framework.permissions import IsAuthenticated
 
 
 #   ---VISTA RELACIONADAS A PRODUCTOS---
@@ -249,4 +252,40 @@ class TasaCambioAPIView(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class SolicitarCodigoView(APIView):
+    def post(self, request):
+        serializer = SolicitarCodigoSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {"mensaje": "Código enviado con éxito."}, status=status.HTTP_200_OK
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class VerificarCodigoView(APIView):
+    def post(self, request):
+        serializer = VerificarCodigoSerializer(data=request.data)
+        if serializer.is_valid():
+            resultado = serializer.save()
+            return Response(resultado, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CambiarContrasenaView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = CambiarContrasenaSerializer(
+            data=request.data, context={"request": request}
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {"mensaje": "Contraseña cambiada exitosamente."},
+                status=status.HTTP_200_OK,
+            )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

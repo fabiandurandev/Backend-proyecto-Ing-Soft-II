@@ -19,6 +19,10 @@ from .models import Usuario, Empleado
 from django.contrib.auth.hashers import make_password
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.core.exceptions import ObjectDoesNotExist
+from .models import PasswordResetCode
+from django.core.mail import send_mail
+from rest_framework_simplejwt.tokens import RefreshToken
+from datetime import timedelta
 
 
 class ClienteSerializer(serializers.ModelSerializer):
@@ -395,17 +399,117 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
-        # Puedes agregar info extra al token si quieres:
+
+        # Agregar datos personalizados
         token["email"] = user.email
+
+        try:
+            empleado = Empleado.objects.get(emailEmpleado=user.email)
+            token["rol"] = empleado.nivelAutorizacion
+        except Empleado.DoesNotExist:
+            token["rol"] = None
+
         return token
 
     def validate(self, attrs):
-        # Cambiar 'email' por 'username' internamente para que funcione
         attrs["username"] = attrs.get("email")
-        return super().validate(attrs)
+        data = super().validate(attrs)
+
+        # Agregar info adicional también a la respuesta (opcional pero útil)
+        try:
+            empleado = Empleado.objects.get(emailEmpleado=self.user.email)
+            data["rol"] = empleado.nivelAutorizacion
+        except Empleado.DoesNotExist:
+            data["rol"] = None
+
+        return data
 
 
 class TasaCambioSerializer(serializers.ModelSerializer):
     class Meta:
         model = TasaCambio
         fields = "__all__"
+
+
+class SolicitarCodigoSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        try:
+            usuario = Usuario.objects.get(email=value)
+        except Usuario.DoesNotExist:
+            raise serializers.ValidationError("Este correo no está registrado.")
+        return value
+
+    def create(self, validated_data):
+        email = validated_data["email"]
+        usuario = Usuario.objects.get(email=email)
+        codigo = PasswordResetCode.generar_codigo()
+
+        PasswordResetCode.objects.create(usuario=usuario, codigo=codigo)
+
+        # Aquí se envía el correo
+        send_mail(
+            subject="Código de recuperación de contraseña",
+            message=f"Tu código de recuperación es: {codigo}",
+            from_email="noreply@barberia.com",
+            recipient_list=[email],
+            fail_silently=False,
+        )
+
+        return {"mensaje": "Código enviado al correo."}
+
+
+class VerificarCodigoSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    codigo = serializers.CharField(max_length=6)
+
+    def validate(self, data):
+        email = data.get("email")
+        codigo = data.get("codigo")
+
+        try:
+            usuario = Usuario.objects.get(email=email)
+        except Usuario.DoesNotExist:
+            raise serializers.ValidationError("Correo no registrado.")
+
+        try:
+            codigo_obj = PasswordResetCode.objects.filter(
+                usuario=usuario, codigo=codigo, usado=False
+            ).latest("creado_en")
+        except PasswordResetCode.DoesNotExist:
+            raise serializers.ValidationError("Código inválido.")
+
+        if not codigo_obj.es_valido():
+            raise serializers.ValidationError("El código ha expirado o ya fue usado.")
+
+        data["usuario"] = usuario
+        data["codigo_obj"] = codigo_obj
+        return data
+
+    def create(self, validated_data):
+        codigo_obj = validated_data["codigo_obj"]
+        codigo_obj.usado = True
+        codigo_obj.save()
+
+        # Creamos un token temporal que vence en 10 minutos
+        refresh = RefreshToken.for_user(validated_data["usuario"])
+        access_token = refresh.access_token
+        access_token.set_exp(lifetime=timedelta(minutes=10))
+
+        return {"token_temporal": str(access_token)}
+
+
+class CambiarContrasenaSerializer(serializers.Serializer):
+    nueva_contrasena = serializers.CharField(write_only=True, min_length=6)
+
+    def validate_nueva_contrasena(self, value):
+        # Aquí puedes agregar validaciones más fuertes si quieres
+        return value
+
+    def save(self, **kwargs):
+        usuario = self.context["request"].user
+        nueva_contrasena = self.validated_data["nueva_contrasena"]
+        usuario.set_password(nueva_contrasena)
+        usuario.save()
+        return {"mensaje": "Contraseña cambiada exitosamente."}
