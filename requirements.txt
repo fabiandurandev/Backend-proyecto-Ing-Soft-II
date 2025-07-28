@@ -1,6 +1,7 @@
 asgiref==3.8.1
 black==25.1.0
 click==8.2.1
+dj-database-url==3.0.1
 Django==5.1.1
 django-cors-headers==4.7.0
 django-extensions==3.2.3
@@ -12,6 +13,7 @@ packaging==25.0
 pathspec==0.12.1
 pillow==10.4.0
 platformdirs==4.3.8
+psycopg2-binary==2.9.10
 pydotplus==2.0.2
 pygraphviz==1.14
 PyJWT==2.9.0

@@ -37,3 +37,8 @@ coverage.xml
 # Ignorar caché de migraciones (pero NO los archivos de migración reales)
 **/migrations/__pycache__/
 
+# Base de datos local
+db.sqlite3
+
+# Archivos estáticos generados
+staticfiles/
